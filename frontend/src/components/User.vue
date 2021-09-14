@@ -26,6 +26,24 @@
           v-model="userCreation.password"
           label="Password"
         ></v-text-field>
+        <v-row
+          class="grey lighten-5 mb-6"
+        >
+          <v-col
+            cols="12"
+            sm="6"
+          >
+            <v-select
+              v-model="userCreation.roles"
+              :items="userRoles"
+              label="Select User Roles"
+              multiple
+              chips
+              hint="Select User Roles"
+              persistent-hint
+            ></v-select>
+          </v-col>
+        </v-row>
         <v-btn color="blue" v-on:click="saveUser">
           Create User
         </v-btn>
@@ -120,8 +138,10 @@ export default
             lastname: "",
             email: "",
             password: "",
+            roles: "",
         },
         users: [],
+        userRoles: [],
         responseSuccess: false,
         snackbar: false,
         displayMessage: "",
@@ -143,20 +163,38 @@ export default
             .catch(error => console.log('User Get Error:: ' + error))
         },
         saveUser() {
+            let role_ids = [];
+            let roles = this.userCreation.roles;
+            for(let i = 0; i < roles.length; i++)
+            {
+                role_ids.push({'id': roles[i], 'name': this.getRoleNameGivenId(roles[i])});
+            }
+            //console.log('Role IDs:: ' + JSON.stringify(role_ids));
             const requestData = {
                 firstName: this.userCreation.firstname,
                 lastName: this.userCreation.lastname,
                 email: this.userCreation.email,
                 password: this.userCreation.password,
+                //appUserRoles: role_ids,
+                //appUserRoles: JSON.stringify(role_ids),
+                // appUserRoles: [
+                //   {
+                //     id: 8,
+                //     name: 'RETAIL_ATTENDANT_ROLE'
+                //   }
+                // ],
             };
+            if(roles.length > 0)
+            {
+              requestData.appUserRoles = role_ids;
+            }
+            //console.log('Payload:: ' + JSON.stringify(requestData));
             this.$http.post('/api/v1/user', requestData, {
                     headers: {
                         'Authorization': 'Bearer ' + localStorage.getItem('token')
                     },
                 })
                 .then(response => {
-                    // console.log('Orders 1:: ' + JSON.stringify(response.data))
-                    // console.log('Orders 2:: ' + JSON.stringify(response.data.data))
                     this.getData();
                     this.displayMessage = "User Saved Successfully";
                     this.snackbar = true;
@@ -169,12 +207,59 @@ export default
                 this.snackbar = true;
             })
         },
+        getRoles() {
+            this.$http.get('/api/v1/user/role', {
+            headers: {
+                'Authorization': 'Bearer ' + localStorage.getItem('token')
+            },
+            })
+            .then(response => {
+                this.userRoles = this.getRoleIds(this.decodeRoleNames(response.data), this.decodeRoleIds(response.data));
+            }
+            )
+            .catch(error => console.log('Products Get Error:: ' + error))
+        },
+        getRoleIds(role_names, role_ids)
+        {
+            let tmp = [];
+            for(let i = 0; i < role_ids.length; i++)
+            {
+                tmp.push({'value': role_ids[i], 'text': role_names[i]});
+            }
+            // console.log('Got Final Role IDs As:: ' + JSON.stringify(tmp));
+            return(tmp);
+        },
+        decodeRoleNames(data) {
+            let types = data.map(p => p.name);
+            // console.log('Got Role Names As:: ' + JSON.stringify(types));
+            return(types);
+        },
+        decodeRoleIds(data) {
+            let ids = data.map(p => p.id);
+            // console.log('Got Role IDs As:: ' + JSON.stringify(ids));
+            return(ids);
+        },
+        getRoleNameGivenId(roleId) {
+            let ret = '';
+            let pl = this.userRoles;
+            for(let i = 0; i < pl.length; i++)
+            {
+              if(pl[i].value == roleId)
+              {
+                ret = pl[i].text;
+                break;
+              }
+            }
+            return(ret);
+        },
     },
     mounted() {
         this.getData();
+        this.getRoles();
     },
     created() {
         this.getData();
+        this.getRoles();
     },
 };
 </script>
