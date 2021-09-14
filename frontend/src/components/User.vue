@@ -8,7 +8,10 @@
           You have successfully added an user
         </v-alert>
       </v-col>
-      <v-col sm="6">
+      <v-col
+        cols="12"
+        sm="4"
+      >
         <h3>User Creation</h3>
         <v-text-field
           v-model="userCreation.firstname"
@@ -21,6 +24,7 @@
         <v-text-field
           v-model="userCreation.email"
           label="Email"
+          :rules="emailRules"
         ></v-text-field>
         <v-text-field
           v-model="userCreation.password"
@@ -48,7 +52,9 @@
           Create User
         </v-btn>
       </v-col>
-      <v-col sm="6">
+      <v-col 
+        sm="8"
+      >
         <h3>Users</h3>
         <v-simple-table>
           <template v-slot:default>
@@ -146,6 +152,14 @@ export default
         snackbar: false,
         displayMessage: "",
         color: 'general',
+        emailRules: [
+          value => !!value || 'Required.',
+          value => (value || '').length <= 64 || 'Max 64 characters',
+          value => {
+            const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+            return pattern.test(value) || 'Invalid e-mail.'
+          },
+        ],
     }),
     methods: {
         getData() {

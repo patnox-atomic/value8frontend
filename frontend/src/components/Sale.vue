@@ -20,14 +20,19 @@
           no-data-text="There are no products"
           value=0
           @change="onChangeProduct"
+          required
         ></v-select>
         <v-text-field
           v-model="saleCreation.quantity"
           label="Quantity"
+          :rules="quantityRules"
+          required
         ></v-text-field>
         <v-text-field
           v-model="saleCreation.price"
           label="Price"
+          :rules="priceRules"
+          required
         ></v-text-field>
         <v-btn color="blue" v-on:click="saveSale">
           Create Sale
@@ -105,6 +110,16 @@ export default
         snackbar: false,
         displayMessage: "",
         color: 'general',
+        quantityRules: [
+            v => String(v).length > 0 || 'This field may not be empty',
+            v => Number.isInteger(Number(v)) || 'The value must be an integer number',
+            v => v > 0 || 'The value must be greater than zero'
+        ],
+        priceRules: [
+            v => String(v).length > 0 || 'This field may not be empty',
+            //v => Number.isInteger(Number(v)) || 'The value must be an integer number',
+            v => v > 0 || 'The value must be greater than zero'
+        ],
     }),
     methods: {
         getData() {

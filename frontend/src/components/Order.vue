@@ -8,7 +8,7 @@
           You have successfully added an order
         </v-alert>
       </v-col>
-      <v-col sm="6">
+      <v-col sm="4">
         <h3>Order Creation</h3>
         <v-select
           v-model="orderCreation.product_id"
@@ -24,12 +24,13 @@
         <v-text-field
           v-model="orderCreation.quantity"
           label="Quantity"
+          :rules="quantityRules"
         ></v-text-field>
         <v-btn color="blue" v-on:click="saveOrder">
           Create Order
         </v-btn>
       </v-col>
-      <v-col sm="6">
+      <v-col sm="8">
         <h3>Orders</h3>
         <!-- <v-simple-table>
           <template v-slot:default>
@@ -144,6 +145,11 @@ export default
             { text: 'Date Fulfilled', value: 'date_fullfilled' },
             { text: 'Product Name', value: 'product.name' },
             { text: 'Actions', value: 'actions', sortable: false },
+        ],
+        quantityRules: [
+            v => String(v).length > 0 || 'This field may not be empty',
+            v => Number.isInteger(Number(v)) || 'The value must be an integer number',
+            v => v > 0 || 'The value must be greater than zero'
         ],
     }),
     methods: {
